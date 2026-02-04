@@ -1,0 +1,25 @@
+# Create a local config.yml file from this template
+
+local:
+  payments:
+    local_to_remote_ports:
+      "9001": "9001"
+  payments:
+    local_to_remote_ports:
+      "9002": "9002"
+  web-gateway:
+    local_to_remote_ports:
+      "8080": "8080"
+
+remote:
+  rabbitmq:
+    local_to_remote_ports:
+      "5672": "5672"
+      "15672": "15672"
+  grafana:
+    local_to_remote_ports:
+      "3000": "3000"
+  alloy:
+    local_to_remote_ports:
+      "4317": "4317"
+      "4318": "4318"
