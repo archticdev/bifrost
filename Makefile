@@ -10,4 +10,8 @@ $(BASTION_DIR)docker-compose.yml: $(BASTION_DIR)config.yml $(BASTION_DIR)docker-
 bifrost-config: $(BASTION_DIR)docker-compose.yml
 
 bifrost-down:
-	@cd $(BASTION_DIR) && docker compose down
+	@if [ -f $(BASTION_DIR)docker-compose.yml ]; then \
+		cd $(BASTION_DIR) && docker compose down; \
+	else \
+		echo "No docker-compose.yml found, skipping bifrost"; \
+	fi
