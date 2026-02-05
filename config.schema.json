@@ -1,0 +1,91 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Bifrost Configuration",
+  "description": "Configuration schema for bifrost SSH tunneling setup",
+  "type": "object",
+  "required": ["ssh", "docker"],
+  "definitions": {
+    "portMapping": {
+      "type": "object",
+      "description": "Mapping of local ports to remote ports",
+      "additionalProperties": {
+        "type": "string",
+        "pattern": "^[0-9]+$"
+      }
+    },
+    "serviceConfig": {
+      "type": "object",
+      "required": ["local_to_remote_ports"],
+      "properties": {
+        "local_to_remote_ports": {
+          "$ref": "#/definitions/portMapping"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "properties": {
+    "local": {
+      "type": "object",
+      "description": "Local services to tunnel",
+      "additionalProperties": {
+        "$ref": "#/definitions/serviceConfig"
+      }
+    },
+    "remote": {
+      "type": "object",
+      "description": "Remote services to tunnel",
+      "additionalProperties": {
+        "$ref": "#/definitions/serviceConfig"
+      }
+    },
+    "ssh": {
+      "type": "object",
+      "description": "SSH connection configuration",
+      "required": ["user", "host", "port", "identity_file"],
+      "properties": {
+        "user": {
+          "type": "string",
+          "description": "SSH username",
+          "minLength": 1
+        },
+        "host": {
+          "type": "string",
+          "description": "SSH host address",
+          "minLength": 1
+        },
+        "port": {
+          "type": "integer",
+          "description": "SSH port number",
+          "minimum": 1,
+          "maximum": 65535
+        },
+        "identity_file": {
+          "type": "string",
+          "description": "Path to SSH private key file",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "docker": {
+      "type": "object",
+      "description": "Docker configuration",
+      "required": ["network"],
+      "properties": {
+        "network": {
+          "type": "string",
+          "description": "Docker network name",
+          "minLength": 1
+        },
+        "socket": {
+          "type": "string",
+          "description": "Docker socket",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

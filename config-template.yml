@@ -23,3 +23,12 @@ remote:
     local_to_remote_ports:
       "4317": "4317"
       "4318": "4318"
+
+ssh:
+  user:
+  host:
+  port:
+  identity_file:
+
+docker:
+  network: common

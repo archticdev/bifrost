@@ -1,13 +1,10 @@
 # Get the directory of this Makefile
-BASTION_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
+bifrost:
 
-bifrost: bifrost-config
-	@cd $(BASTION_DIR) && docker compose up -d --force-recreate
+include embeddable.mk
 
-$(BASTION_DIR)docker-compose.yml: $(BASTION_DIR)config.yml $(BASTION_DIR)docker-compose.bifrost-template.yml $(BASTION_DIR)generate-config.sh
-	@cd $(BASTION_DIR) && pwd && ./generate-config.sh
+restart: bifrost-restart
 
-bifrost-config: $(BASTION_DIR)docker-compose.yml
+down: bifrost-down
 
-bifrost-down:
-	- cd $(BASTION_DIR) && docker compose down
+config: bifrost-config

@@ -1,0 +1,24 @@
+name: bifrost
+networks:
+  {{NETWORK}}:
+    external: true
+services:
+  bifrost:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    environment:
+      SSH_USER: {{SSH_USER}}
+      SSH_HOST: {{SSH_HOST}}
+    networks:
+      {{NETWORK}}:
+        aliases:
+{{ALIASES}}
+    volumes:
+      - {{SSH_IDENTITY_FILE}}:/root/ssh.pem:ro
+      - ./run.sh:/usr/local/bin/run.sh:ro
+      - ./config.yml:/root/config.yml:ro
+      - {{SOCKET}}:/var/run/docker.sock:ro
+    command: ["/bin/sh", "/usr/local/bin/run.sh", "/root/config.yml", "/root/ssh.pem"]
+{{PORTS}}
