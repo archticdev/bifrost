@@ -1,13 +1,44 @@
-# Bifrost Service
+# Bifrost
 
-The bifrost service creates SSH tunnels to remote services defined in `config.yml`.
+```
+╔═════════════════════════════════════════════════════════════════════╗
+║                    The Bridge Between Realms                        ║
+║          Connecting Local Development to Remote Services            ║
+╚═════════════════════════════════════════════════════════════════════╝
+```
+
+## What is Bifrost?
+
+Bifrost is an SSH tunneling tool that creates secure bridges between your local development environment and remote services. Named after the rainbow bridge in Norse mythology, Bifrost automates the creation and management of bidirectional SSH tunnels, making it easy to:
+
+- **Access remote services locally**: Forward remote service ports to your local machine (using SSH `-L` tunnels)
+- **Expose local services remotely**: Make your local development services accessible from remote hosts (using SSH `-R` reverse tunnels)
+- **Simplify development workflows**: Connect to remote databases, APIs, and services without complex networking or VPN configurations
+- **Maintain persistent connections**: Automatically reconnect tunnels if connections drop using `autossh`
+
+## Key Features
+
+- 🔒 **Secure SSH tunneling** with automatic reconnection
+- 🔄 **Bidirectional tunnels** (both local forward and reverse)
+- 📝 **YAML-based configuration** for easy service management
+- 🐳 **Docker-integrated** for seamless container networking
+- 🎯 **Multiple port mappings** per service
+- 🌐 **Network aliases** for service discovery
 
 ## How It Works
 
-1. The bifrost container connects to a remote EC2 instance via SSH
-2. It creates local forward tunnels (-L) for services listed in the `remote` section
-3. It creates reverse tunnels (-R) for services listed in the `local` section
-4. Network aliases are automatically configured so services can connect using their service names
+1. The bifrost container connects to a remote host (e.g., EC2 instance) via SSH
+2. It creates **local forward tunnels (-L)** for services listed in the `remote` section, making remote services accessible locally
+3. It creates **reverse tunnels (-R)** for services listed in the `local` section, exposing local services to the remote host
+4. Network aliases are automatically configured so other Docker services can connect using service names instead of localhost ports
+
+### Use Cases
+
+- **Database Access**: Connect to remote PostgreSQL, MySQL, or MongoDB instances as if they were running locally
+- **API Development**: Access staging/production APIs from your local development environment
+- **Webhook Testing**: Expose local services to receive webhooks from external services
+- **Microservices Development**: Access remote microservices while developing locally
+- **Secure Remote Access**: Bypass firewalls and access services in private networks
 
 ## Configuration
 
@@ -72,7 +103,7 @@ The `docker-compose.bifrost.yml` file is **generated** from the template and sho
 To generate/update it:
 
 ```bash
-make bifrost-config
+make config
 ```
 
 This script:
@@ -87,8 +118,7 @@ This script:
 After generating the config:
 
 ```bash
-cd compositions
-docker-compose -f docker-compose.bifrost.yml up -d
+make [bifrost|restart]
 ```
 
 Now other services can connect to remote services using their service names:
@@ -98,9 +128,20 @@ Now other services can connect to remote services using their service names:
 
 ## Files
 
-- `Dockerfile` - Bifrost container image with SSH and autossh
-- `bifrost.sh` - Script that creates SSH tunnels based on config.yml
-- `docker-compose.bifrost-template.yml` - Template for the bifrost service
-- `generate-config.sh` - Script to generate docker-compose.bifrost.yml
-- `Makefile` - Make targets for bifrost configuration
-- `README.md` - This file
+- `Dockerfile` - Container images with required tools
+- `run.sh` - Main script that creates SSH tunnels based on config.yml
+- `config.yml` - Service configuration file (define your tunnels here)
+- `config-template.yml` - Template for creating your config.yml
+- `config.schema.json` - JSON schema for validating configuration
+- `docker-compose.bifrost.yml` - Generated Docker Compose file for Bifrost service
+- `docker-compose.heimdall.yml` - Heimdall (Bifrost generator) service configuration
+- `docker-compose.template.yml` - Template for generating compose files
+- `generate.sh` - Script to generate docker-compose.bifrost.yml from config
+- `Makefile` - Make targets for Bifrost configuration and management
+- `embeddable.mk` - Makefile that can be embedded in other projects
+
+## Requirements
+
+- Docker and Docker Compose
+- SSH access to a remote host
+- SSH private key for authentication
