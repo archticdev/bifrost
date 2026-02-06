@@ -30,7 +30,120 @@ Bifrost is an SSH tunneling tool that creates secure bridges between your local 
 1. The bifrost container connects to a remote host (e.g., EC2 instance) via SSH
 2. It creates **local forward tunnels (-L)** for services listed in the `remote` section, making remote services accessible locally
 3. It creates **reverse tunnels (-R)** for services listed in the `local` section, exposing local services to the remote host
-4. Network aliases are automatically configured so other Docker services can connect using service names instead of localhost ports
+4. **Network aliases are automatically assigned** to the Bifrost container matching the names of remote services (e.g., `payments`, `postgres`), so other Docker services can connect using service names instead of localhost ports
+5. Your local applications use the same connection strings whether services run locally or remotely—just start or stop Bifrost to switch between them
+
+## Architecture Diagram
+
+```mermaid
+graph TB
+    subgraph "Local Machine"
+        subgraph "Docker Network"
+            LocalApp["Local App Container<br/>(Your Service)"]
+            LocalService["Local Service<br/>(e.g., web-gateway:8080)"]
+            Bifrost["🌉 Bifrost Container<br/>(SSH Client)<br/>🏷️ Aliases: payments, postgres"]
+        end
+    end
+    
+    subgraph "SSH Tunnel"
+        SSHTunnel["Encrypted SSH Connection<br/>(autossh)"]
+    end
+    
+    subgraph "Remote Server (e.g., EC2)"
+        SSHServer["SSH Server<br/>(Port 22)<br/>⚠️ Outside Docker Network"]
+        RemoteHost["Remote Host<br/>(localhost)"]
+        
+        subgraph "Remote Docker Network"
+            RemoteDB["Remote Database Container<br/>(PostgreSQL)<br/>Internal: 5432<br/>📤 Exposed: 5432→host"]
+            RemoteAPI["Remote API Container<br/>(payments)<br/>Internal: 9001<br/>📤 Exposed: 9001→host"]
+            RemoteApp["Remote App Container<br/>(Accesses local services)<br/>Internal: 3000<br/>📤 Exposed: 3000→host"]
+        end
+    end
+    
+    %% Remote Tunnels (Forward -L)
+    LocalApp -->|"DNS resolves 'payments'<br/>to Bifrost container"| Bifrost
+    Bifrost -->|"Local Forward Tunnel (-L)<br/>0.0.0.0:9001 → localhost:9001"| SSHTunnel
+    SSHTunnel --> SSHServer
+    SSHServer --> RemoteHost
+    RemoteHost -->|"Port 9001<br/>exposed to host"| RemoteAPI
+    
+    Bifrost -->|"Local Forward Tunnel (-L)<br/>0.0.0.0:5432 → localhost:5432"| SSHTunnel
+    RemoteHost -->|"Port 5432<br/>exposed to host"| RemoteDB
+    
+    %% Reverse Tunnels (-R)
+    LocalService -->|"Listening on<br/>0.0.0.0:8080"| Bifrost
+    Bifrost -->|"Reverse Tunnel (-R)<br/>localhost:8080 ← 0.0.0.0:8080"| SSHTunnel
+    SSHServer --> RemoteHost
+    RemoteHost -->|"Access via<br/>localhost:8080"| RemoteApp
+    
+    style Bifrost fill:#ffd6d6,stroke:#ffb3ba,stroke-width:3px,color:#2c2c2c
+    style SSHTunnel fill:#d4e9ff,stroke:#a8d1ff,stroke-width:2px,color:#2c2c2c
+    style SSHServer fill:#ffe4e1,stroke:#ffb3ba,stroke-width:2px,color:#2c2c2c
+    style RemoteHost fill:#f5f5f5,stroke:#d0d0d0,stroke-width:2px,color:#2c2c2c
+    style LocalApp fill:#e3f5ea,stroke:#b8dfc8,color:#2c2c2c
+    style LocalService fill:#e3f5ea,stroke:#b8dfc8,color:#2c2c2c
+    style RemoteAPI fill:#fffde3,stroke:#f5edb3,color:#2c2c2c
+    style RemoteDB fill:#fffde3,stroke:#f5edb3,color:#2c2c2c
+    style RemoteApp fill:#fffde3,stroke:#f5edb3,color:#2c2c2c
+```
+
+### Tunnel Flow Explained
+
+**Remote Services (Forward Tunnels `-L`):**
+```
+Local App → payments:9001 → Bifrost Container → SSH Tunnel → SSH Server → Remote Host (localhost:9001) → Remote Container
+           (network alias)    (0.0.0.0:9001)      (encrypted)   (outside docker)    (exposed port)        (internal port)
+```
+
+**Local Services (Reverse Tunnels `-R`):**
+```
+Remote Container → localhost:8080 → Remote Host → SSH Server → SSH Tunnel → Bifrost Container → Local Service
+(in docker network) (exposed port)   (host port)   (outside docker) (encrypted)   (0.0.0.0:8080)      (web-gateway:8080)
+```
+
+**Important:** Remote services must expose their ports to the host (using Docker's `-p` flag or `ports:` in docker-compose) because the SSH server runs on the host, not inside the Docker network. The SSH tunnel connects to `localhost` on the remote host, which then routes to the exposed container ports.
+
+### Network Aliases: Seamless Service Discovery
+
+One of Bifrost's most powerful features is **DNS aliasing** through Docker network aliases. The Bifrost container automatically takes on the DNS names of all remote services it tunnels to.
+
+**How it works:**
+
+When you define remote services in `config.yml`:
+```yaml
+remote:
+  payments:
+    local_to_remote_ports:
+      "9001": "9001"
+  postgres:
+    local_to_remote_ports:
+      "5432": "5432"
+```
+
+Bifrost is assigned network aliases `payments` and `postgres` in the Docker network. This means:
+
+```
+payments:9001  →  resolves to Bifrost container IP  →  tunneled to remote payments service
+postgres:5432  →  resolves to Bifrost container IP  →  tunneled to remote postgres service
+```
+
+**Why this matters:**
+
+Your local services can use the **same connection strings** whether the service is running locally or remotely:
+
+```javascript
+// This connection string works for both scenarios:
+const dbUrl = 'postgresql://postgres:5432/mydb';
+
+// Scenario 1: postgres container running locally
+//   → DNS resolves 'postgres' to local postgres container
+
+// Scenario 2: postgres running remotely with Bifrost
+//   → DNS resolves 'postgres' to Bifrost container
+//   → Bifrost tunnels to remote postgres
+```
+
+**No configuration changes needed!** Switch between local and remote services by simply starting or stopping Bifrost—your application code remains unchanged.
 
 ### Use Cases
 
