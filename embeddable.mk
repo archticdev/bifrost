@@ -2,15 +2,17 @@
 BIFROST_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
 bifrost: bifrost-config
-	@cd $(BIFROST_DIR) && docker compose up -d
+	@cd $(BIFROST_DIR)
+	docker compose -f docker-compose.bifrost.yml up -d --force-recreate
 
 bifrost-restart: bifrost-config
-	@cd $(BIFROST_DIR) && docker compose restart
+	@cd $(BIFROST_DIR)
+	docker compose -f docker-compose.bifrost.yml restart
 
-$(BIFROST_DIR)docker-compose.yml: $(BIFROST_DIR)config.yml $(BIFROST_DIR)docker-compose.template.yml $(BIFROST_DIR)generate.sh
 	@cd $(BIFROST_DIR) && pwd && ./generate.sh config.yml
+$(BIFROST_DIR)docker-compose.bifrost.yml: $(BIFROST_DIR)config.yml $(BIFROST_DIR)docker-compose.template.yml $(BIFROST_DIR)generate.sh
 
-bifrost-config: $(BIFROST_DIR)docker-compose.yml
+bifrost-config: $(BIFROST_DIR)docker-compose.bifrost.yml
 
 bifrost-down: bifrost-config
-	- cd $(BIFROST_DIR) && docker compose down
+	- cd $(BIFROST_DIR) && docker compose -f docker-compose.bifrost.yml down

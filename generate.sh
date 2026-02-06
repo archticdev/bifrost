@@ -16,7 +16,7 @@ else
 fi
 
 TEMPLATE_FILE="$SCRIPT_DIR/docker-compose.template.yml"
-OUTPUT_FILE="$SCRIPT_DIR/docker-compose.yml"
+OUTPUT_FILE="$SCRIPT_DIR/docker-compose.bifrost.yml"
 
 # Function to run yq - tries native yq first, then Docker
 run_yq() {
