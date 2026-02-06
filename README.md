@@ -13,14 +13,13 @@
 ║                                                                     ║
 ╚═════════════════════════════════════════════════════════════════════╝
 ```
-Bifrost is an SSH tunneling tool that creates secure bridges between your local development environment and remote services. 
-Named after the bridge between Midgard and Asgard in Norse mythology, Bifrost bridges your local and remote environments by 
-automating the creation and management of bidirectional SSH tunnels. This makes it easy to:
+Frustrated by your laptop struggling with the load of running your entire development stack locally?
+Do you want to seamlessly offload some of the work to remote servers? 
 
-- **Access remote services locally**: Forward remote service ports to your local machine (using SSH `-L` tunnels)
-- **Expose local services remotely**: Make your local development services accessible from remote hosts (using SSH `-R` reverse tunnels)
-- **Simplify development workflows**: Connect to remote databases, APIs, and services without complex networking or VPN configurations
-- **Maintain persistent connections**: Automatically reconnect tunnels if connections drop using `autossh`
+Bifrost is an SSH tunneling tool that creates secure bridges between your local development environment and remote services.
+
+1. Define your service ports and SSH config in `config.yml` (`config-template.yml` provided)
+2. Run `make`
 
 ## Key Features
 
@@ -40,7 +39,6 @@ automating the creation and management of bidirectional SSH tunnels. This makes 
 4. **Network aliases are automatically assigned** to the Bifrost container matching the names of remote services (e.g., `payments`, `postgres`), so other Docker services can connect using service names instead of localhost ports
 5. Your local applications use the same connection strings whether services run locally or remotely—just start or stop Bifrost to switch between them
 
-## Architecture Diagram
 
 ```mermaid
 graph TB
