@@ -77,11 +77,6 @@
           "type": "string",
           "description": "Docker network name",
           "minLength": 1
-        },
-        "socket": {
-          "type": "string",
-          "description": "Docker socket",
-          "minLength": 1
         }
       },
       "additionalProperties": false
