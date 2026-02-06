@@ -74,9 +74,18 @@
       "required": ["network"],
       "properties": {
         "network": {
-          "type": "string",
-          "description": "Docker network name",
-          "minLength": 1
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "Name of the Docker network",
+              "minLength": 1
+            },
+            "external": {
+              "type": "boolean",
+              "description": "Whether the Docker network is declared elsewhere"
+            }
+          }
         }
       },
       "additionalProperties": false

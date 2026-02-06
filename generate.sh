@@ -34,17 +34,12 @@ echo "Generating bifrost configuration from $CONFIG_YML..."
 
 # Extract values from config.yml
 if command -v yq &> /dev/null; then
-    NETWORK=$(yq eval '.docker.network' "$CONFIG_YML" 2>/dev/null || echo "common")
+    NETWORK=$(yq eval '.docker.network.name' "$CONFIG_YML" 2>/dev/null || echo "common")
+    EXTERNAL=$(yq eval '.docker.network.external' "$CONFIG_YML" 2>/dev/null || echo "true")
     SSH_IDENTITY_FILE=$(yq eval '.ssh.identity_file' "$CONFIG_YML" 2>/dev/null || echo "~/.ssh/id_rsa")
     SSH_USER=$(yq eval '.ssh.user' "$CONFIG_YML" 2>/dev/null || echo "")
     SSH_HOST=$(yq eval '.ssh.host' "$CONFIG_YML" 2>/dev/null || echo "")
     services=$(yq eval '.remote | keys | .[]' "$CONFIG_YML" 2>/dev/null || echo "")
-else
-    NETWORK=$(docker run --rm -i -v "$SCRIPT_DIR:/workdir" mikefarah/yq eval '.docker.network' /workdir/config.yml 2>/dev/null || echo "common")
-    SSH_IDENTITY_FILE=$(docker run --rm -i -v "$SCRIPT_DIR:/workdir" mikefarah/yq eval '.ssh.identity_file' /workdir/config.yml 2>/dev/null || echo "~/.ssh/id_rsa")
-    SSH_USER=$(docker run --rm -i -v "$SCRIPT_DIR:/workdir" mikefarah/yq eval '.ssh.user' /workdir/config.yml 2>/dev/null || echo "")
-    SSH_HOST=$(docker run --rm -i -v "$SCRIPT_DIR:/workdir" mikefarah/yq eval '.ssh.host' /workdir/config.yml 2>/dev/null || echo "")
-    services=$(docker run --rm -i -v "$SCRIPT_DIR:/workdir" mikefarah/yq eval '.remote | keys | .[]' /workdir/config.yml 2>/dev/null || echo "")
 fi
 
 # Build aliases array
@@ -93,6 +88,7 @@ template_content=$(cat "$TEMPLATE_FILE")
 # Perform substitutions using parameter expansion
 output_content="$template_content"
 output_content="${output_content//\{\{NETWORK\}\}/$NETWORK}"
+output_content="${output_content//\{\{EXTERNAL\}\}/$EXTERNAL}"
 output_content="${output_content//\{\{SSH_IDENTITY_FILE\}\}/$SSH_IDENTITY_FILE}"
 output_content="${output_content//\{\{SSH_USER\}\}/$SSH_USER}"
 output_content="${output_content//\{\{SSH_HOST\}\}/$SSH_HOST}"
@@ -119,7 +115,7 @@ echo "$output_content" > "$OUTPUT_FILE"
 
 echo "✓ Generated $OUTPUT_FILE with the following configuration:"
 echo ""
-echo "Network: $NETWORK"
+echo "Network: $NETWORK (external: $EXTERNAL)"
 echo "SSH User: $SSH_USER"
 echo "SSH Host: $SSH_HOST"
 echo "SSH Identity File: $SSH_IDENTITY_FILE"

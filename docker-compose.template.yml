@@ -1,7 +1,7 @@
 name: bifrost
 networks:
   {{NETWORK}}:
-    external: true
+    external: {{EXTERNAL}}
 services:
   bifrost:
     image: ghcr.io/archticdev/bifrost:latest

@@ -30,6 +30,7 @@ automating the creation and management of bidirectional SSH tunnels. This makes 
 - 🐳 **Docker-integrated** for simple toolchains and seamless container networking
 - 🎯 **Multiple port mappings** per service
 - 🌐 **Network aliases** for service discovery
+- ⚡ **Auto-network creation** - runs directly from config without manual setup
 
 ## How It Works
 
@@ -215,6 +216,121 @@ local:
 **Defaults for local section:**
 - `local_host`: Defaults to `0.0.0.0`
 - `remote_host`: Defaults to `localhost`
+
+### SSH Configuration
+
+Configure the SSH connection to the remote server:
+
+```yaml
+ssh:
+  user: ec2-user
+  host: ec2-12-34-56-78.compute.amazonaws.com
+  port: 22
+  identity_file: ~/.ssh/id_rsa
+```
+
+**Required fields:**
+- `user`: SSH username for the remote server
+- `host`: Hostname or IP address of the remote server
+- `port`: SSH port (typically 22)
+- `identity_file`: Path to your SSH private key file
+
+### Docker Network Configuration
+
+Configure the Docker network where your local services are running:
+
+```yaml
+docker:
+  network:
+    name: common
+    external: true
+```
+
+**Fields:**
+- `name`: Name of the Docker network (required)
+- `external`: Whether the network already exists (required)
+  - `true`: The network is declared elsewhere (typical use case) - Bifrost joins the existing network where your local services are running
+  - `false`: Bifrost will create the network if it doesn't exist (useful for standalone testing)
+
+**Understanding the Network:**
+
+The `docker.network` configuration specifies **which Docker network your local services are on**. This is the network where:
+- Your application containers are running (e.g., your web app, worker services)
+- These services need to connect to remote services (e.g., remote databases, APIs)
+
+When Bifrost joins this network, it becomes accessible via network aliases (e.g., `postgres`, `payments`), allowing your local services to connect to remote services transparently.
+
+**Typical Usage (external: true):**
+
+Most commonly, you have an existing Docker Compose setup with a network:
+
+```yaml
+# Your existing docker-compose.yml
+version: '3.8'
+services:
+  web-app:
+    image: myapp:latest
+    networks:
+      - common
+
+networks:
+  common:
+    name: common
+```
+
+Your Bifrost config should reference this **same network**:
+
+```yaml
+docker:
+  network:
+    name: common
+    external: true  # Network already exists from your docker-compose.yml
+```
+
+Now `web-app` can connect to remote services via Bifrost using service names like `postgres:5432` or `payments:9001`.
+
+**Standalone Usage (external: false):**
+
+If you're running Bifrost standalone without other Docker Compose services (e.g., for testing or direct access):
+
+```yaml
+docker:
+  network:
+    name: bifrost-network
+    external: false  # Bifrost creates its own network
+```
+
+This allows Bifrost to run independently without requiring pre-existing network setup.
+
+### Complete Configuration Example
+
+Here's a full `config.yml` example for typical usage:
+
+```yaml
+remote:
+  postgres:
+    local_to_remote_ports:
+      "5432": "5432"
+  payments:
+    local_to_remote_ports:
+      "9001": "9001"
+
+local:
+  web-gateway:
+    local_to_remote_ports:
+      "8080": "8080"
+
+ssh:
+  user: ec2-user
+  host: ec2-12-34-56-78.compute.amazonaws.com
+  port: 22
+  identity_file: ~/.ssh/id_rsa
+
+docker:
+  network:
+    name: common
+    external: true  # Join existing network where your services run
+```
 
 ### Generating the Docker Compose File
 

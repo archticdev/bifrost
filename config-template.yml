@@ -28,4 +28,6 @@ ssh:
   identity_file:
 
 docker:
-  network: common
+  network:
+    name: common
+    external: false
