@@ -3,9 +3,6 @@
 local:
   payments:
     local_to_remote_ports:
-      "9001": "9001"
-  payments:
-    local_to_remote_ports:
       "9002": "9002"
   web-gateway:
     local_to_remote_ports:
