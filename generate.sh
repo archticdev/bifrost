@@ -18,21 +18,6 @@ fi
 TEMPLATE_FILE="$SCRIPT_DIR/docker-compose.template.yml"
 OUTPUT_FILE="$SCRIPT_DIR/docker-compose.bifrost.yml"
 
-# Function to run yq - tries native yq first, then Docker
-run_yq() {
-    if command -v yq &> /dev/null; then
-        yq "$@"
-    elif command -v docker &> /dev/null; then
-        docker run --rm -i -v "$SCRIPT_DIR:/workdir" mikefarah/yq "$@"
-    else
-        echo "Error: yq is not installed and Docker is not available."
-        echo "Please install yq:"
-        echo "  brew install yq"
-        echo "or ensure Docker is running."
-        exit 1
-    fi
-}
-
 # Check if config.yml exists
 if [ ! -f "$CONFIG_YML" ]; then
     echo "Error: config.yml not found at $CONFIG_YML"
