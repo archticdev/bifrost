@@ -1,10 +1,10 @@
 # Create a local config.yml file from this template
 
 local:
-  payments:
+  app:
     local_to_remote_ports:
-      "9002": "9002"
-  web-gateway:
+      "80": "80"
+  platform:
     local_to_remote_ports:
       "8080": "8080"
 
