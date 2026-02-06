@@ -1,15 +1,21 @@
-# Bifrost
-
 ```
 ╔═════════════════════════════════════════════════════════════════════╗
+║                                                                     ║
+║        ▓▓▓▓▓▓╗ ▓▓╗▓▓▓▓▓▓▓╗▓▓▓▓▓▓╗  ▓▓▓▓▓▓  ▓▓▓▓▓▓▓╗▓▓▓▓▓▓▓▓╗        ║
+║        ▓▓╔══▓▓╗▓▓║▓▓╔════╝▓▓╔══▓▓╗▓▓╔═══▓▓╗▓▓╔════╝╚══▓▓╔══╝        ║
+║        ▓▓▓▓▓▓╔╝▓▓║▓▓▓▓▓╗  ▓▓▓▓▓▓╔╝▓▓║   ▓▓║▓▓▓▓▓▓▓╗   ▓▓║           ║
+║        ▓▓╔══▓▓╗▓▓║▓▓╔══╝  ▓▓╔══▓▓╗▓▓║   ▓▓║╚════▓▓║   ▓▓║           ║
+║        ▓▓▓▓▓▓╔╝▓▓║▓▓║     ▓▓║  ▓▓║╚▓▓▓▓▓▓╔╝▓▓▓▓▓▓▓║   ▓▓║           ║
+║        ╚═════╝ ╚═╝╚═╝     ╚═╝  ╚═╝ ╚═════╝ ╚══════╝   ╚═╝           ║
+║                                                                     ║
 ║                    The Bridge Between Realms                        ║
 ║          Connecting Local Development to Remote Services            ║
+║                                                                     ║
 ╚═════════════════════════════════════════════════════════════════════╝
 ```
-
-## What is Bifrost?
-
-Bifrost is an SSH tunneling tool that creates secure bridges between your local development environment and remote services. Named after the rainbow bridge in Norse mythology, Bifrost automates the creation and management of bidirectional SSH tunnels, making it easy to:
+Bifrost is an SSH tunneling tool that creates secure bridges between your local development environment and remote services. 
+Named after the bridge between Midgard and Asgard in Norse mythology, Bifrost bridges your local and remote environments by 
+automating the creation and management of bidirectional SSH tunnels. This makes it easy to:
 
 - **Access remote services locally**: Forward remote service ports to your local machine (using SSH `-L` tunnels)
 - **Expose local services remotely**: Make your local development services accessible from remote hosts (using SSH `-R` reverse tunnels)
@@ -21,13 +27,13 @@ Bifrost is an SSH tunneling tool that creates secure bridges between your local 
 - 🔒 **Secure SSH tunneling** with automatic reconnection
 - 🔄 **Bidirectional tunnels** (both local forward and reverse)
 - 📝 **YAML-based configuration** for easy service management
-- 🐳 **Docker-integrated** for seamless container networking
+- 🐳 **Docker-integrated** for simple toolchains and seamless container networking
 - 🎯 **Multiple port mappings** per service
 - 🌐 **Network aliases** for service discovery
 
 ## How It Works
 
-1. The bifrost container connects to a remote host (e.g., EC2 instance) via SSH
+1. The Bifrost container connects to a remote host (e.g., EC2 instance) via SSH
 2. It creates **local forward tunnels (-L)** for services listed in the `remote` section, making remote services accessible locally
 3. It creates **reverse tunnels (-R)** for services listed in the `local` section, exposing local services to the remote host
 4. **Network aliases are automatically assigned** to the Bifrost container matching the names of remote services (e.g., `payments`, `postgres`), so other Docker services can connect using service names instead of localhost ports
@@ -105,7 +111,8 @@ Remote Container → localhost:8080 → Remote Host → SSH Server → SSH Tunne
 
 ### Network Aliases: Seamless Service Discovery
 
-One of Bifrost's most powerful features is **DNS aliasing** through Docker network aliases. The Bifrost container automatically takes on the DNS names of all remote services it tunnels to.
+One of Bifrost's most powerful features is **DNS aliasing** through Docker network aliases. 
+The Bifrost container automatically takes on the DNS names of all remote services it tunnels to.
 
 **How it works:**
 
