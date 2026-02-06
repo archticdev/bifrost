@@ -9,8 +9,8 @@ bifrost-restart: bifrost-config
 	@cd $(BIFROST_DIR)
 	docker compose -f docker-compose.bifrost.yml restart
 
-	@cd $(BIFROST_DIR) && pwd && ./generate.sh config.yml
 $(BIFROST_DIR)docker-compose.bifrost.yml: $(BIFROST_DIR)config.yml $(BIFROST_DIR)docker-compose.template.yml $(BIFROST_DIR)generate.sh
+	cd $(BIFROST_DIR) && CONFIG=./config.yml docker compose -f docker-compose.heimdall.yml up -d
 
 bifrost-config: $(BIFROST_DIR)docker-compose.bifrost.yml
 

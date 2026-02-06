@@ -4,9 +4,11 @@ networks:
     external: true
 services:
   bifrost:
+    image: ghcr.io/archticdev/bifrost:latest
     build:
       context: .
       dockerfile: Dockerfile
+      target: runner
     restart: always
     environment:
       SSH_USER: {{SSH_USER}}

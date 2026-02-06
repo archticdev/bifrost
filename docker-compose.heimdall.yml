@@ -1,0 +1,14 @@
+name: heimdall
+services:
+  heimdall:
+    image: ghcr.io/archticdev/heimdall:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    restart: no
+    volumes:
+      - ${CONFIG-./config.yml}:/root/config.yml:ro
+      - .:/root
+    working_dir: /root
+    command: ["bash", "-c", "./generate.sh", "config.yml"]
