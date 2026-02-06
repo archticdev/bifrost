@@ -114,7 +114,7 @@ output_content="${output_content//\{\{SSH_HOST\}\}/$SSH_HOST}"
 
 # Handle multi-line replacements using awk
 output_content=$(echo "$output_content" | awk -v aliases="$aliases" '{
-    if ($0 ~ /{{ALIASES}}/) {
+    if ($0 ~ /\{\{ALIASES\}\}/) {
         system("printf \"%b\\n\" \"" aliases "\"")
     } else {
         print $0
@@ -122,7 +122,7 @@ output_content=$(echo "$output_content" | awk -v aliases="$aliases" '{
 }')
 
 output_content=$(echo "$output_content" | awk -v ports="$ports" '{
-    if ($0 ~ /{{PORTS}}/) {
+    if ($0 ~ /\{\{PORTS\}\}/) {
         system("printf \"%b\\n\" \"" ports "\"")
     } else {
         print $0
